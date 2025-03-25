@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const base64Image = event.target.result.split(',')[1];
             
             // 调用我们的Vercel API路由
-            fetch('/api/analyze', {
+            fetch('/api/simple', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
