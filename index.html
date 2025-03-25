@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片分析系统</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>图片分析系统</h1>
+        
+        <div class="upload-section">
+            <p>请上传一张图片，系统将分析图片内容</p>
+            <input type="file" id="file-input" accept="image/*" style="display: none;">
+            <button id="upload-btn">选择图片</button>
+        </div>
+        
+        <div class="preview-section">
+            <img id="image-preview" alt="预览图">
+        </div>
+        
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>正在分析图片，请稍候...</p>
+        </div>
+        
+        <div class="error-message" id="error-msg"></div>
+        
+        <div class="result-section" id="result-container">
+            <h2 class="result-heading">分析结果</h2>
+            <div class="result-item" id="location">
+                <strong>位置信息：</strong><span id="location-text"></span>
+            </div>
+            <div class="result-item" id="people">
+                <strong>人数：</strong><span id="people-text"></span>
+            </div>
+            <div class="result-item" id="objects">
+                <strong>物品：</strong><span id="objects-text"></span>
+            </div>
+            <div class="result-item" id="position">
+                <strong>大概位置：</strong><span id="position-text"></span>
+            </div>
+            <div class="result-item" id="food">
+                <strong>附近美食：</strong><span id="food-text"></span>
+            </div>
+            <div class="result-item" id="scenery">
+                <strong>附近风景：</strong><span id="scenery-text"></span>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
