@@ -11,9 +11,7 @@ build
 dist
 out
 
-# 其他
-.DS_Store
-*.pem
+# 环境变量
 .env
 .env.local
 .env.development.local
