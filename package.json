@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "private": true,
+  "dependencies": {
+    "sharp": "^0.32.1"
+  },
   "scripts": {
     "build": "echo 'No build step needed'"
   }
