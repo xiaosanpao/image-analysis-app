@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const base64Image = event.target.result;
             
             // 调用我们的Vercel API路由
-            fetch('/api/analyze', {  // 修改这里为 /api/analyze
+            fetch('/api/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
