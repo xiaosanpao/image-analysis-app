@@ -1,20 +1,8 @@
 {
   "name": "image-analysis-app",
   "version": "1.0.0",
-  "description": "图片分析应用，使用智谱API进行图像分析",
-  "main": "index.html",
+  "private": true,
   "scripts": {
-    "dev": "vercel dev",
-    "deploy": "vercel deploy --prod"
-  },
-  "keywords": [
-    "image",
-    "analysis",
-    "ai"
-  ],
-  "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "vercel": "^28.0.0"
+    "build": "echo 'No build step needed'"
   }
 }
