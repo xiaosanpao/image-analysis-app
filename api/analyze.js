@@ -40,16 +40,15 @@ export default async function handler(req, res) {
     try {
       // 移除base64图像的前缀（如果存在）
       const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
-      const imageBuffer = Buffer.from(base64Data, 'base64');
       
       // 上传图像
       const uploadResponse = await fetch('https://api.imagga.com/v2/uploads', {
         method: 'POST',
         headers: {
           'Authorization': authHeader,
-          'Content-Type': 'application/octet-stream'
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: imageBuffer
+        body: `image=${encodeURIComponent(base64Data)}`
       });
       
       if (!uploadResponse.ok) {
