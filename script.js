@@ -36,10 +36,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // 将图片转换为base64
         const reader = new FileReader();
         reader.onload = function(event) {
-            const base64Image = event.target.result.split(',')[1];
+            const base64Image = event.target.result;
             
             // 调用我们的Vercel API路由
-            fetch('/api/simple', {
+            fetch('/api/analyze', {  // 修改这里为 /api/analyze
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
