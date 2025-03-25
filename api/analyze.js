@@ -5,41 +5,72 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
   
+  // 详细的环境变量和请求日志
+  console.log('====== API请求开始 ======');
+  console.log('请求方法:', req.method);
+  console.log('环境变量检查:', {
+    apiKey: process.env.IMAGGA_API_KEY ? 'EXISTS' : 'NOT SET',
+    apiKeyLength: process.env.IMAGGA_API_KEY?.length,
+    apiSecretExists: !!process.env.IMAGGA_API_SECRET,
+    apiSecretLength: process.env.IMAGGA_API_SECRET?.length
+  });
+  
   // 处理OPTIONS请求
   if (req.method === 'OPTIONS') {
+    console.log('收到OPTIONS预检请求');
     return res.status(200).end();
   }
   
   // 验证请求方法
   if (req.method !== 'POST') {
+    console.log(`请求方法错误: 需要POST，收到${req.method}`);
     return res.status(405).json({ error: '只支持POST方法' });
   }
   
   try {
-    const { base64Image } = req.body || {};
+    // 安全地解析请求体
+    const body = typeof req.body === 'string' 
+      ? JSON.parse(req.body) 
+      : req.body || {};
+    
+    console.log('请求体:', JSON.stringify(body));
+    
+    const { base64Image } = body;
     
     if (!base64Image) {
+      console.log('请求体缺少base64Image字段');
       return res.status(400).json({ error: '请求中缺少base64Image' });
     }
     
-    // Imagga API凭证 - 从环境变量获取
-    const apiKey = process.env.NEXT_PUBLIC_IMAGGA_API_KEY;
-    const apiSecret = process.env.NEXT_PUBLIC_IMAGGA_API_SECRET;
+    // 获取API凭证 - 使用服务器端环境变量
+    const apiKey = process.env.IMAGGA_API_KEY;
+    const apiSecret = process.env.IMAGGA_API_SECRET;
     
     if (!apiKey || !apiSecret) {
-      console.error('API凭证未配置');
-      return res.status(500).json({ error: 'API凭证未配置' });
+      console.error('API凭证未配置', {
+        apiKeyExists: !!apiKey,
+        apiSecretExists: !!apiSecret
+      });
+      return res.status(500).json({ 
+        error: 'API凭证未配置', 
+        details: {
+          apiKeySet: !!apiKey,
+          apiSecretSet: !!apiSecret
+        }
+      });
     }
     
-    // 构建Imagga API的授权头 - 注意使用 Buffer.from
+    // 构建Imagga API的授权头
     const authHeader = 'Basic ' + Buffer.from(`${apiKey}:${apiSecret}`).toString('base64');
+    console.log('生成授权头（部分隐藏）:', authHeader.substring(0, 20) + '...');
     
     try {
       // 移除base64图像的前缀（如果存在）
       const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
       const imageBuffer = Buffer.from(base64Data, 'base64');
+      console.log('图像Buffer大小:', imageBuffer.length);
       
-      // 上传图像
+      // 上传图像到Imagga
       const uploadResponse = await fetch('https://api.imagga.com/v2/uploads', {
         method: 'POST',
         headers: {
@@ -49,17 +80,21 @@ export default async function handler(req, res) {
         body: imageBuffer
       });
       
+      console.log('Imagga上传响应状态:', uploadResponse.status);
+      
+      // 详细的错误处理
       if (!uploadResponse.ok) {
         const errorText = await uploadResponse.text();
-        console.error('图像上传错误:', errorText);
+        console.error('Imagga上传错误:', errorText);
         return res.status(uploadResponse.status).json({ 
-          error: '图像上传失败', 
+          error: `图像上传失败 (${uploadResponse.status})`, 
           details: errorText 
         });
       }
       
       const uploadData = await uploadResponse.json();
       const uploadId = uploadData.result.upload_id;
+      console.log('上传成功，uploadId:', uploadId);
       
       // 获取图像标签
       const tagsResponse = await fetch(`https://api.imagga.com/v2/tags?upload_id=${uploadId}`, {
@@ -71,9 +106,9 @@ export default async function handler(req, res) {
       
       if (!tagsResponse.ok) {
         const errorText = await tagsResponse.text();
-        console.error('标签分析错误:', errorText);
+        console.error('Imagga标签错误:', errorText);
         return res.status(tagsResponse.status).json({ 
-          error: '标签分析失败', 
+          error: `标签分析失败 (${tagsResponse.status})`, 
           details: errorText 
         });
       }
@@ -90,9 +125,9 @@ export default async function handler(req, res) {
       
       if (!categoriesResponse.ok) {
         const errorText = await categoriesResponse.text();
-        console.error('类别分析错误:', errorText);
+        console.error('Imagga类别错误:', errorText);
         return res.status(categoriesResponse.status).json({ 
-          error: '类别分析失败', 
+          error: `类别分析失败 (${categoriesResponse.status})`, 
           details: errorText 
         });
       }
@@ -163,6 +198,7 @@ export default async function handler(req, res) {
         }]
       };
       
+      console.log('分析完成，返回结果');
       return res.status(200).json(formattedResult);
       
     } catch (uploadError) {
